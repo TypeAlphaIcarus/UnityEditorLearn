@@ -399,3 +399,13 @@ public class PopWindow : EditorWindow
 
 在窗口中绘制的方式和在Inspector中类似
 
+
+
+### 8、例子：节点编辑器
+
+新建脚本`NodeManager`和`NodeManagerExtension`
+
+```C#
+
+```
+
