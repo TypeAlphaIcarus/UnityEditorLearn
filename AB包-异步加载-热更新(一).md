@@ -153,7 +153,7 @@ public class Player : MonoBehaviour
 
 ```C#
 [AddComponentMenu("自定义脚本/Player", 0)]	//第二个参数将对同一层级的组件进行排序
-public class Player : MonoBehaviour
+public class Unit : MonoBehaviour
 {
     
 }
@@ -184,27 +184,99 @@ public class Player : MonoBehaviour
 ```C#
 using UnityEditor;
 
-[CustomEditor(typeof(Player))]		//指定扩展的组件类型
-public class PlayerExtend : Editor
+[CustomEditor(typeof(Unit))]		//指定扩展的组件类型
+public class UnitExtend : Editor
 {
-    private Player _Componet;
-
+    private Unit unit;
     private void OnEnable()
     {
-        Debug.Log("OnEnable");
+        unit = target as Unit;	//也可写为 unit = (Unit)target, target为关联的对象
+        Debug.Log($"{unit} OnEnable");
     }
     private void OnDisable()
     {
-        Debug.Log("OnDisable");
+        Debug.Log($"{unit} OnDisable");
+        player = null;
     }
 }
 ```
 
-`OnEnable()`会在选中搭载了对应组件的对象时运行
+`OnEnable()`会在**选中**或**添加**被关联的对象时运行
 
-`OnDisable()`会在取消选中搭载了对应组件的对象时运行
+`OnDisable()`会在**取消选中**或**移除**被关联对象时运行
 
 这里的两个方法实际指的是激活和取消指定对象的Inspector面板
 
-若对象没有搭载被扩展的组件(这里位Player脚本)，那么扩展脚本(PlayerExtend)不会运行
+若对象没有搭载被扩展的组件(这里位Unit脚本)，那么扩展脚本(UnitExtend)不会运行
+
+
+
+继续扩展
+
+```C#
+[CustomEditor(typeof(Unit))]
+public class UnitExtend : Editor
+{
+    private Unit unit;
+    private void OnEnable()
+    {
+        unit = (Unit)target;
+        Debug.Log($"{unit.name} OnEnable");
+    }
+    private void OnDisable()
+    {
+        Debug.Log($"{unit.name} OnDisable");
+        unit = null;
+    }
+    
+    public override void OnInspectorGUI()
+    {
+        EditorGUILayout.LabelField("单位属性");     //显示一行文字，类似Label
+
+        EditorGUILayout.IntField("单位Id(只读)", unit.id);//显示关联对象的id，这样写是只读的，不能实时修改对象的值，因为没有将修改后的值进行赋值
+
+        unit.id = EditorGUILayout.IntField("单位Id", unit.id);    //这样写就能实时修改
+
+        //其他类似的还有，根据数据类型有不同的方法来显示
+        unit.name = EditorGUILayout.TextField("单位名称", unit.name);            //string
+        unit.health = EditorGUILayout.FloatField("单位生命值", unit.health);     //float
+        unit.isMale = EditorGUILayout.Toggle("是否为男性", unit.isMale);         //bool
+        unit.headDir = EditorGUILayout.Vector3Field("单位朝向", unit.headDir);   //Vector3
+        unit.color = EditorGUILayout.ColorField("单位颜色", unit.color);         //Color
+        
+        //以上为一般的常用类型
+        //但如果是GameObject对象，那么需要特殊处理
+
+        unit.Weapon = EditorGUILayout.ObjectField("武器", unit.Weapon, typeof(GameObject), true) as GameObject;
+        //四个参数分别为：显示的名称、获取的值的对象，值的类型，是否可以用场景的对象进行赋值
+
+        unit.Texture = EditorGUILayout.ObjectField("贴图", unit.Texture, typeof(Texture), false) as Texture;
+        //贴图不能直接用场景中的对象进行赋值，这里值为false，而是应当用资源文件进行赋值
+        
+        //接下来实现单选枚举和多选枚举
+
+        //单选枚举          BattleArea为枚举类型，需要值转换为对应的数据类型后才能实时修改并赋值
+        unit.BattleArea = (BattleArea)EditorGUILayout.EnumPopup("作战区域", unit.BattleArea);
+
+        //多选枚举
+        unit.Weapons = (Weapon)EditorGUILayout.EnumFlagsField("使用武器类型", unit.Weapons);
+        //注意：多选枚举中每个类型按照二进制位来判断是否选中，需要在枚举类型中对其进行赋值
+    }
+}
+```
+
+多选枚举中的赋值：
+
+```C#
+public enum Weapon	//根据二进制为的状态来判断对应的元素是否选中
+{
+    machineGun = 1,
+    rocketLancher = 2,
+    pistol = 4
+}
+```
+
+
+
+终极拓展：更新可序列化数据
 
