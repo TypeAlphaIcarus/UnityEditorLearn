@@ -147,9 +147,9 @@ public class Player : MonoBehaviour
 
 
 
-### 5、编辑器深度扩展
+### 5、Inspector深度扩展
 
-#### 5.1、扩展AddComponent菜单
+#### 5.1、扩展AddComponent(添加组件)菜单
 
 ```C#
 [AddComponentMenu("自定义脚本/Player", 0)]	//第二个参数将对同一层级的组件进行排序
@@ -211,7 +211,7 @@ public class UnitExtend : Editor
 
 
 
-继续扩展
+##### 常规扩展
 
 ```C#
 [CustomEditor(typeof(Unit))]
@@ -278,5 +278,111 @@ public enum Weapon	//根据二进制为的状态来判断对应的元素是否�
 
 
 
-终极拓展：更新可序列化数据
+##### 更新可序列化数据
+
+```C#
+public override void OnInspectorGUI()
+{
+    ...
+    //更新可序列化的数据，显示效果类似在类中声明  public List<string> list
+    serializedObject.Update();	//更新可序列化的数据
+    SerializedProperty sp = serializedObject.FindProperty("Items");     //找到组件上的对应成员变量
+    EditorGUILayout.PropertyField(sp, new GUIContent("道具信息"), true);    //绘制可序列化的数据
+    serializedObject.ApplyModifiedProperties();     //将修改后的数据，写入到可序列化的原始数据中
+}
+```
+
+
+
+##### 可视化扩展
+
+```C#
+public override void OnInspectorGUI()
+{
+    ...
+    //绘制滑动条
+    unit.health = EditorGUILayout.Slider(new GUIContent("单位生命值"), unit.health, 0, 100);
+
+    //绘制提示窗口
+    if (unit.health > 80)
+        EditorGUILayout.HelpBox("血量太高", MessageType.Error);
+    if (unit.health < 20)
+        EditorGUILayout.HelpBox("血量太低", MessageType.Warning);
+
+    //绘制按钮
+    GUILayout.Button("这是一个按钮");
+    if (GUILayout.Button("打印"))         //通过if来判断按钮是否被点击，按钮点击后会返回true
+        Debug.Log("点击了按钮");
+    
+    //排列顺序
+    //横向排列多个控件
+    EditorGUILayout.BeginHorizontal();
+
+    GUILayout.Button("按钮1");
+    GUILayout.Button("按钮2");
+    GUILayout.Button("按钮3");
+
+    EditorGUILayout.EndHorizontal();
+}
+```
+
+
+
+### 6、菜单栏扩展
+
+新建脚本`MenuExtension`
+
+```C#
+public class MenuExtension
+{
+    //设置后将在菜单栏添加相应的选项，路径为工具-导出AB包，点击后将执行相应的方法
+    [MenuItem("工具/导出AB包")]  
+    static void BuildAssetBundle()
+    {
+        Debug.Log("导出AB包");
+    }
+}
+```
+
+
+
+### 7、窗口
+
+新建脚本`PopWindow`
+
+```C#
+public class PopWindow : EditorWindow
+{
+    [MenuItem("工具/测试窗口")]
+    static void OpenWindow()
+    {
+        //三个参数分别为：是否为工具窗口，窗口显示的名称，是否立即聚焦到窗口
+        PopWindow window = GetWindow<PopWindow>(false, "窗口", true);
+        window.minSize = new Vector2(400, 300);
+        window.maxSize = new Vector2(800, 600);
+    }
+
+    private void OnEnable()     //打开窗口时调用
+    {
+        
+    }
+    private void OnDisable()    //关闭窗口时调用
+    {
+        
+    }
+    private void Update()       //持续更新窗口
+    {
+        
+    }
+    private void OnGUI()        //类似Inspector中的OnInspectorGUI()
+    {
+        if (GUILayout.Button("按钮"))
+        {
+            Debug.Log("点击了按钮");
+        }
+    }
+}
+```
+
+在窗口中绘制的方式和在Inspector中类似
 
