@@ -370,7 +370,7 @@ public class PopWindow : EditorWindow
     {
         
     }
-    private void Update()       //持续更新窗口
+    private void Update()       //打开窗口后每帧调用一次
     {
         
     }
@@ -380,6 +380,19 @@ public class PopWindow : EditorWindow
         {
             Debug.Log("点击了按钮");
         }
+    }
+    
+    private void OnHierarchyChange()    //场景层级面板变化时调用一次
+    {
+        Debug.Log("Hierarchy Change!");
+    }
+    private void OnProjectChange()      //Project 资源窗口改变时调用
+    {
+        Debug.Log("Projecct Change!");
+    }
+    private void OnSelectionChange()    //场景中选中的对象改变时调用
+    {
+        Debug.Log(Selection.activeObject.name); //打印当前选中物体的名称
     }
 }
 ```
