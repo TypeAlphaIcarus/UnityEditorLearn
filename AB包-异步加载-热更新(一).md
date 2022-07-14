@@ -406,6 +406,28 @@ public class PopWindow : EditorWindow
 新建脚本`NodeManager`和`NodeManagerExtension`
 
 ```C#
+[ExecuteInEditMode]
+public class NodeManager : MonoBehaviour
+{
+    public List<GameObject> nodes;
+    
+    void Update()
+    {
+        DrawLinesBetweenNodes();
+    }
 
+    private void DrawLinesBetweenNodes()
+    {
+        if (nodes.Count <= 0)
+            return;
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            Debug.DrawLine(nodes[i].transform.position,
+                nodes[i + 1].transform.position,
+                Color.red,
+                Time.deltaTime);
+        }
+    }
+}
 ```
 
