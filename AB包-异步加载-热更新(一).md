@@ -826,6 +826,14 @@ BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptionsCollect
 
 注意：AB包不能重复加载
 
+这里将图片放置在一个空物体上，设为预制体，然后分别将预制体和图片设为两个AB包
+
+新建脚本`LoadTest`
+
+```C#
+
+```
+
 
 
 ## 7、异步加载
