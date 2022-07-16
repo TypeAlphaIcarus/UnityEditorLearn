@@ -798,14 +798,6 @@ BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptionsCollect
 
 
 
-### 5.2、设置多个导出平台选项
-
-```C#
-
-```
-
-
-
 ## 6、AB包加载深入
 
 ### 6.1、完整的加载流程
@@ -831,13 +823,102 @@ BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptionsCollect
 新建脚本`LoadTest`
 
 ```C#
+public class LoadTest : MonoBehaviour
+{
+    // Start is called before the first frame update
+    void Start()
+    {
+        //加载主AB包，主AB包名称与导出路径的文件夹名称相同，会自动创建
+        AssetBundle mainAB = AssetBundle.LoadFromFile(Config.ABPath + "/ab");
 
+        //获取配置文件，这里为固定的写法
+        AssetBundleManifest manifest = mainAB.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+        //分析预制体所在AB包依赖哪些AB包
+        string[] dependencies = manifest.GetAllDependencies("prefabs");     //这里参数为预制体所在的AB包名称，返回所有引用的AB包名称
+
+        //加载所有依赖的AB包
+        for (int i = 0; i < dependencies.Length; i++)
+        {
+            AssetBundle.LoadFromFile(Config.ABPath + "/" + dependencies[i]);    //根据名称加载所有AB包
+        }
+
+        //加载预制体所在的AB包
+        AssetBundle prefab = AssetBundle.LoadFromFile(Config.ABPath + "/prefabs");
+
+        //加载预制体
+        Object obj = prefab.LoadAsset("TestObj");
+
+        Instantiate(obj);
+    }
+}
+```
+
+运行后便会加载预制体了
+
+AB包管理器内部可以使用**字典**来实现，可以放置同名的AB包被加载，即可以放置AB包被加载多次，然后可以根据名称去卸载AB包
+
+
+
+### 6.2、异步加载
+
+这里介绍异步加载
+
+新建脚本`AsyncLoadTest`
+
+```C#
+public class AsyncLoadTest : MonoBehaviour
+{
+    void Start()
+    {
+        StartCoroutine(LoadAB());
+    }
+    IEnumerator LoadAB()
+    {
+        AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(Config.ABPath + "/old/ui");
+        yield return abcr;
+
+        Sprite sprite = abcr.assetBundle.LoadAsset<Sprite>("Jesscia");
+
+        if (TryGetComponent(out SpriteRenderer renderer)) 
+            renderer.sprite = sprite;
+    }
+}
 ```
 
 
 
-## 7、异步加载
-
-
-
 ## 8、内存分析
+
+文件加载不会占用内存空间(那么卸载也不会释放内存)，真正加载资源时才会占用内存
+
+使用`Unload(true)`时，会卸载掉AB包和其正在使用的资源
+
+使用`Unload(false)`时，只会卸载掉AB包，如果再次加载AB包和同一个资源，那么之前的资源将不会被引用，成为游离资源
+
+因为Unity内存为懒回收，不会自动回收没有使用的内存，需要进行手动释放
+
+```C#
+Resources.UnloadUnusedAssets();
+```
+
+尽量减少使用频率，GC会消耗大量资源
+
+
+
+# 三、Lua
+
+## 1、概述
+
+特点：
+
+​	轻量级：可以方便嵌入其它程序
+
+​	可扩展：提供了易于使用的接口和机制，由宿主语言(C/C++/C#等)提供一部分功能，Lua可以直接使用
+
+使用方式：需要高性能的部分，使用C/C++等，需要快速实现的部分，使用Lua
+
+
+
+## 2、变量与数据类型
+
