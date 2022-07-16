@@ -1400,7 +1400,7 @@ print(s, e)
 Lua 函数可以接受可变数目的参数，和 C 语言类似，在函数参数列表中使用三点 **...** 表示函数有可变的参数。
 
 ```lua
-function add(...)  
+function add(...)  --这里类似C#的parmas，可以输入任意个参数
 local s = 0  
   for i, v in ipairs{...} do   --> {...} 表示一个由所有变长参数构成的数组  
     s = s + v  
@@ -1408,5 +1408,898 @@ local s = 0
   return s  
 end  
 print(add(3,4,5,6,7))  --->25
+
+--例子
+function average(...)
+   result = 0
+   local arg={...}    --> arg 为一个表，局部变量
+   for i,v in ipairs(arg) do
+      result = result + v
+   end
+   print("总共传入 " .. #arg .. " 个数")
+   return result/#arg
+end
+
+print("平均值为",average(10,5,3,4,5,6))
 ```
 
+可以通过 select("#",...) 来获取可变参数的数量
+
+```lua
+function average(...)
+   result = 0
+   local arg={...}
+   for i,v in ipairs(arg) do
+      result = result + v
+   end
+   print("总共传入 " .. select("#",...) .. " 个数")
+   return result/select("#",...)
+end
+
+print("平均值为",average(10,5,3,4,5,6))
+```
+
+有时候可能需要几个固定参数加上可变参数，固定参数必须放在变长参数之前:
+
+```lua
+function fwrite(fmt, ...)  ---> 固定的参数fmt
+    return io.write(string.format(fmt, ...))    
+end
+
+fwrite("runoob\n")       --->fmt = "runoob", 没有变长参数。  
+fwrite("%d%d\n", 1, 2)   --->fmt = "%d%d", 变长参数为 1 和 2
+```
+
+
+
+## 7、运算符
+
+基本和C相同，但需要记住的：
+
+/为除法运算，计算结果包含小数部分
+
+//为整除运算，结果不包含小数部分
+
+逻辑运算符
+
+and，逻辑&，若A为false，则返回A，否则返回B，两个都为true，返回B
+
+or，逻辑 |，若A为true，则返回A，否则返回B，两个都为false，返回B
+
+not，逻辑 !，结果取反
+
+
+
+## 8、字符串
+
+常用的字符串操作
+
+```lua
+string.upper( s )	--全部转为大写
+string.lower( s )	--全部转为小写
+
+string.gsub( mainString, findString, replaceString, num )	
+--替换字符串，mainString为要操作的字符，将findString替换为replaceString，num为替换次数，不写则全部替换
+--string.gsub("aaaa","a","z",3);	结果为zzza
+
+string.find(str, substr, [init,[plain]])
+--在一个指定的目标字符串 str 中搜索指定的内容 substr，如果找到了一个匹配的子串，就会返回这个子串的起始索引和结束索引，不存在则返回 nil。
+--init 指定了搜索的起始位置，默认为 1，可以一个负数，表示从后往前数的字符个数。
+--plain 表示是否以正则表达式匹配。
+--以下实例查找字符串 "Lua" 的起始索引和结束索引位置：
+string.find("Hello Lua user", "Lua", 1) --结果为7 9
+
+string.reverse() --反转字符串
+string.format()  --返回格式化字符串
+string.char()	--将整型数字转成字符并连接 string.char(97,98,99,100)	abcd
+string.byte()	--转换字符为整数值(可以指定某个字符，默认第一个字符) string.byte("ABCD") 65，转换了A
+string.len()	--计算字符串长度
+string.rep(sting, n)	--返回字符串string的n个拷贝 65	string.rep("abcd",2)  abcdabcd 
+
+string.gmatch(str, pattern)	
+--返回一个迭代器函数，每一次调用这个函数，返回一个在字符串 str 找到的下一个符合 pattern 描述的子串。如果参数 pattern 描述的字符串没有找到，迭代函数返回nil。
+
+string.match(str, pattern, init)
+--string.match()只寻找源字串str中的第一个配对. 参数init可选, 指定搜寻过程的起点, 默认为1。
+--在成功配对时, 函数将返回配对表达式中的所有捕获结果; 如果没有设置捕获标记, 则返回整个配对字符串. 当没有成功的配对时, 返回nil。
+
+```
+
+匹配模式
+
+```lua
+--匹配日期
+s = "Deadline is 30/05/1999, firm"
+date = "%d%d/%d%d/%d%d%d%d"
+print(string.sub(s, string.find(s, date)))    --> 30/05/1999
+```
+
+
+
+## 9、数组
+
+### 9.1、一维数组
+
+```lua
+array = {"Lua", "Tutorial"}
+
+for i= 0, 2 do
+   print(array[i])
+end
+```
+
+Lua的索引可以是负数
+
+```lua
+array = {}
+
+for i= -2, 2 do
+   array[i] = i *2
+end
+
+for i = -2,2 do
+   print(array[i])
+end
+```
+
+
+
+### 9.2、多维数组
+
+```lua
+-- 初始化数组
+array = {}
+for i=1,3 do
+   array[i] = {}
+      for j=1,3 do
+         array[i][j] = i*j
+      end
+end
+
+-- 访问数组
+for i=1,3 do
+   for j=1,3 do
+      print(array[i][j])
+   end
+end
+```
+
+## 10、迭代器
+
+迭代器（iterator）是一种对象，它能够用来遍历标准模板库容器中的部分或全部元素，每个迭代器对象代表容器中的确定的地址。
+
+在 Lua 中迭代器是一种支持指针类型的结构，它可以遍历集合的每一个元素。
+
+泛型 for 在自己内部保存迭代函数，实际上它保存三个值：迭代函数、状态常量、控制变量。
+
+泛型 for 迭代器提供了集合的 key/value 对，语法格式如下：
+
+```lua
+for k, v in pairs(t) do
+    print(k, v)
+end
+
+--例子
+array = {"Google", "Runoob"}
+
+for key,value in ipairs(array)
+do
+   print(key, value)
+end
+```
+
+
+
+无状态迭代器
+
+无状态的迭代器是指不保留任何状态的迭代器，因此在循环中我们可以利用无状态迭代器避免创建闭包花费额外的代价。
+
+每一次迭代，迭代函数都是用两个变量（状态常量和控制变量）的值作为参数被调用，一个无状态的迭代器只利用这两个值可以获取下一个元素。
+
+这种无状态迭代器的典型的简单的例子是 ipairs，它遍历数组的每一个元素，元素的索引需要是数值。
+
+以下实例我们使用了一个简单的函数来实现迭代器，实现 数字 n 的平方：
+
+```lua
+function square(iteratorMaxCount,currentNumber)
+   if currentNumber<iteratorMaxCount
+   then
+      currentNumber = currentNumber+1
+   return currentNumber, currentNumber*currentNumber
+   end
+end
+
+for i,n in square,3,0
+do
+   print(i,n)
+end
+
+--例子
+function iter (a, i)
+    i = i + 1
+    local v = a[i]
+    if v then
+       return i, v
+    end
+end
+ 
+function ipairs (a)
+    return iter, a, 0
+end
+```
+
+
+
+多状态迭代器
+
+很多情况下，迭代器需要保存多个状态信息而不是简单的状态常量和控制变量，最简单的方法是使用闭包，还有一种方法就是将所有的状态信息封装到 table 内，将 table 作为迭代器的状态常量，因为这种情况下可以将所有的信息存放在 table 内，所以迭代函数通常不需要第二个参数。
+
+以下实例我们创建了自己的迭代器：
+
+```lua
+array = {"Google", "Runoob"}
+
+function elementIterator (collection)
+   local index = 0
+   local count = #collection
+   -- 闭包函数
+   return function ()
+      index = index + 1
+      if index <= count
+      then
+         --  返回迭代器的当前元素
+         return collection[index]
+      end
+   end
+end
+
+for element in elementIterator(array)
+do
+   print(element)
+end
+```
+
+
+
+## 11、表
+
+构造器是创建和初始化表的表达式。表是Lua特有的功能强大的东西。最简单的构造函数是{}，用来创建一个空表。可以直接初始化数组:
+
+```lua
+-- 初始化表
+mytable = {}
+
+-- 指定值
+mytable[1]= "Lua"
+
+-- 移除引用
+mytable = nil
+-- lua 垃圾回收会释放内存
+```
+
+
+
+### table的操作
+
+```lua
+table.concat(table,[,sep[,start[,end]]]):
+--concat是concatenate(连锁, 连接)的缩写. table.concat()函数列出参数中指定table的数组部分从start位置到end位置的所有元素, 元素间以指定的分隔符(sep)隔开。
+
+table.insert(table,[pos,] value):
+--在table的数组部分指定位置(pos)插入值为value的一个元素. pos参数可选, 默认为数组部分末尾.
+
+table.maxn(table)
+--指定table中所有正数key值中最大的key值. 如果不存在key值为正数的元素, 则返回0。(Lua5.2之后该方法已经不存在了,本文使用了自定义函数实现)
+
+table.remove(table,[,pos])
+--返回table数组部分位于pos位置的元素. 其后的元素会被前移. pos参数可选, 默认为table长度, 即从最后一个元素删起。
+
+table.sort(table[,comp])
+--对给定的table进行升序排序。
+```
+
+
+
+## 12、模块与包
+
+模块类似于一个封装库，从 Lua 5.1 开始，Lua 加入了标准的模块管理机制，可以把一些公用的代码放在一个文件里，以 API 接口的形式在其他地方调用，有利于代码的重用和降低代码耦合度。
+
+Lua 的模块是由变量、函数等已知元素组成的 table，因此创建一个模块很简单，就是创建一个 table，然后把需要导出的常量、函数放入其中，最后返回这个 table 就行。以下为创建自定义模块 module.lua，文件代码格式如下：
+
+```lua
+-- 文件名为 module.lua
+-- 定义一个名为 module 的模块
+module = {}
+ 
+-- 定义一个常量
+module.constant = "这是一个常量"
+ 
+-- 定义一个函数
+function module.func1()
+    io.write("这是一个公有函数！\n")
+end
+ 
+local function func2()
+    print("这是一个私有函数！")
+end
+ 
+function module.func3()
+    func2()
+end
+ 
+return module
+```
+
+模块的结构就是一个 table 的结构，因此可以像操作调用 table 里的元素那样来操作调用模块里的常量或函数。
+
+上面的 func2 声明为程序块的局部变量，即表示一个私有函数，因此是不能从外部访问模块里的这个私有函数，必须通过模块里的公有函数来调用.
+
+
+
+### require函数
+
+Lua提供了一个名为require的函数用来加载模块。要加载一个模块，只需要简单地调用就可以了。例如：
+
+```lua
+require("<模块名>")
+require "<模块名>"
+--执行 require 后会返回一个由模块常量或函数组成的 table，并且还会定义一个包含该 table 的全局变量。
+
+--例子
+-- test_module.lua 文件
+-- module 模块为上文提到到 module.lua
+require("module")
+ 
+print(module.constant)
+ 
+module.func3()
+```
+
+
+
+### 加载机制
+
+对于自定义的模块，模块文件不是放在哪个文件目录都行，函数 require 有它自己的文件路径加载策略，它会尝试从 Lua 文件或 C 程序库中加载模块。
+
+require 用于搜索 Lua 文件的路径是存放在全局变量 package.path 中，当 Lua 启动后，会以环境变量 LUA_PATH 的值来初始这个环境变量。如果没有找到该环境变量，则使用一个编译时定义的默认路径来初始化。
+
+当然，如果没有 LUA_PATH 这个环境变量，也可以自定义设置，在当前用户根目录下打开 .profile 文件（没有则创建，打开 .bashrc 文件也可以），例如把 "~/lua/" 路径加入 LUA_PATH 环境变量里：
+
+```lua
+#LUA_PATH
+export LUA_PATH="~/lua/?.lua;;"
+```
+
+文件路径以 ";" 号分隔，最后的 2 个 ";;" 表示新加的路径后面加上原来的默认路径。
+
+接着，更新环境变量参数，使之立即生效。
+
+```lua
+source ~/.profile
+```
+
+这时假设 package.path 的值是：
+
+```lua
+/Users/dengjoe/lua/?.lua;./?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/local/lib/lua/5.1/?.lua;/usr/local/lib/lua/5.1/?/init.lua
+```
+
+那么调用 require("module") 时就会尝试打开以下文件目录去搜索目标。
+
+```lua
+/Users/dengjoe/lua/module.lua;
+./module.lua
+/usr/local/share/lua/5.1/module.lua
+/usr/local/share/lua/5.1/module/init.lua
+/usr/local/lib/lua/5.1/module.lua
+/usr/local/lib/lua/5.1/module/init.lua
+```
+
+如果找过目标文件，则会调用 package.loadfile 来加载模块。否则，就会去找 C 程序库。
+
+搜索的文件路径是从全局变量 package.cpath 获取，而这个变量则是通过环境变量 LUA_CPATH 来初始。
+
+搜索的策略跟上面的一样，只不过现在换成搜索的是 so 或 dll 类型的文件。如果找得到，那么 require 就会通过 package.loadlib 来加载它。
+
+
+
+### C包
+
+Lua和C是很容易结合的，使用 C 为 Lua 写包。
+
+与Lua中写包不同，C包在使用以前必须首先加载并连接，在大多数系统中最容易的实现方式是通过动态连接库机制。
+
+Lua在一个叫loadlib的函数内提供了所有的动态连接的功能。这个函数有两个参数:库的绝对路径和初始化函数。所以典型的调用的例子如下:
+
+```lua
+local path = "/usr/local/lua/lib/libluasocket.so"
+local f = loadlib(path, "luaopen_socket")
+```
+
+loadlib 函数加载指定的库并且连接到 Lua，然而它并不打开库（也就是说没有调用初始化函数），反之他返回初始化函数作为 Lua 的一个函数，这样我们就可以直接在Lua中调用他。
+
+如果加载动态库或者查找初始化函数时出错，loadlib 将返回 nil 和错误信息。我们可以修改前面一段代码，使其检测错误然后调用初始化函数：
+
+```lua
+local path = "/usr/local/lua/lib/libluasocket.so"
+-- 或者 path = "C:\\windows\\luasocket.dll"，这是 Window 平台下*
+local f = assert(loadlib(path, "luaopen_socket"))
+f() -- 真正打开库*
+```
+
+一般情况下我们期望二进制的发布库包含一个与前面代码段相似的 stub 文件，安装二进制库的时候可以随便放在某个目录，只需要修改 stub 文件对应二进制库的实际路径即可。
+
+将 stub 文件所在的目录加入到 LUA_PATH，这样设定后就可以使用 require 函数加载 C 库了。
+
+
+
+## 13、元表metatable
+
+在 Lua table 中我们可以访问对应的 key 来得到 value 值，但是却无法对两个 table 进行操作(比如相加)。
+
+因此 Lua 提供了元表(Metatable)，允许我们改变 table 的行为，每个行为关联了对应的元方法。
+
+例如，使用元表我们可以定义 Lua 如何计算两个 table 的相加操作 a+b。
+
+当 Lua 试图对两个表进行相加时，先检查两者之一是否有元表，之后检查是否有一个叫 **__add** 的字段，若找到，则调用对应的值。 **__add** 等即时字段，其对应的值（往往是一个函数或是 table）就是"元方法"。
+
+有两个很重要的函数来处理元表：
+
+- **setmetatable(table,metatable):** 对指定 table 设置元表(metatable)，如果元表(metatable)中存在 __metatable 键值，setmetatable 会失败。
+- **getmetatable(table):** 返回对象的元表(metatable)。
+
+```lua
+mytable = {}                          -- 普通表
+mymetatable = {}                      -- 元表
+setmetatable(mytable,mymetatable)     -- 把 mymetatable 设为 mytable 的元表
+```
+
+也可直接写为一行
+
+```lua
+mytable = setmetatable({},{})
+```
+
+然后是返回对象的原表
+
+```lua
+getmetatable(mytable)                 -- 这会返回 mymetatable
+```
+
+### 13.1、_index元方法
+
+这是 metatable 最常用的键。
+
+当你通过键来访问 table 的时候，如果这个键没有值，那么Lua就会寻找该table的metatable（假定有metatable）中的`_index `键。如果`_index`包含一个表格，Lua会在表格中查找相应的键。
+
+我们可以在使用 lua 命令进入交互模式查看：
+
+```lua
+$ lua
+Lua 5.3.0  Copyright (C) 1994-2015 Lua.org, PUC-Rio
+\> other = { foo = 3 }
+\> t = setmetatable({}, { __index = other })
+\> t.foo
+3
+\> t.bar
+nil
+```
+
+如果__index包含一个函数的话，Lua就会调用那个函数，table和键会作为参数传递给函数。
+
+_index 元方法查看表中元素是否存在，如果不存在，返回结果为 nil；如果存在则由 _index 返回结果。
+
+```lua
+mytable = setmetatable({key1 = "value1"}, {
+  __index = function(mytable, key)
+    if key == "key2" then
+      return "metatablevalue"
+    else
+      return nil
+    end
+  end
+})
+
+print(mytable.key1,mytable.key2)
+```
+
+可以简写为
+
+```lua
+mytable = setmetatable({key1 = "value1"}, { __index = { key2 = "metatablevalue" } })
+print(mytable.key1,mytable.key2)
+```
+
+
+
+### 13.2、_newindex元方法
+
+
+
+### 13.3、为表添加操作符
+
+
+
+### 13.4、_call元方法
+
+
+
+### 13.5、_tostring元方法
+
+
+
+## 14、协程coroutine
+
+Lua 协同程序(coroutine)与线程比较类似：拥有独立的堆栈，独立的局部变量，独立的指令指针，同时又与其它协同程序共享全局变量和其它大部分东西。
+
+### 线程和协同程序区别
+
+线程与协同程序的主要区别在于，一个具有多个线程的程序可以同时运行几个线程，而协同程序却需要彼此协作的运行。
+
+在任一指定时刻只有一个协同程序在运行，并且这个正在运行的协同程序只有在明确的被要求挂起的时候才会被挂起。
+
+协同程序有点类似同步的多线程，在等待同一个线程锁的几个线程有点类似协同。
+
+基本语法
+
+```lua
+coroutine.create()	--创建协程，返回corotine，参数为一个函数，和resume配合使用时唤醒函数的调用
+coroutine.resume()	--重启协程，和create配合使用
+coroutine.yield()	--挂起协程，将coroutine设置为挂起状态，可以和resume配合使用
+coroutine.status()	--查看协程状态，共有三种：dead、suspended、running
+coroutine.wrap()	--创建协程，返回函数，一旦调用该函数，就进入coroutine，和create功能重复
+coroutine.running()	--返回正在运行的协程，一个coroutine就是一个线程，当running时，就是返回一个coroutine的线程号
+```
+
+例子：
+
+```lua
+-- coroutine_test.lua 文件
+co = coroutine.create(
+    function(i)
+        print(i);
+    end
+)
+ 
+coroutine.resume(co, 1)   -- 1
+print(coroutine.status(co))  -- dead
+ 
+print("----------")
+ 
+co = coroutine.wrap(
+    function(i)
+        print(i);
+    end
+)
+ 
+co(1)
+ 
+print("----------")
+ 
+co2 = coroutine.create(
+    function()
+        for i=1,10 do
+            print(i)
+            if i == 3 then
+                print(coroutine.status(co2))  --running
+                print(coroutine.running()) --thread:XXXXXX
+            end
+            coroutine.yield()
+        end
+    end
+)
+ 
+coroutine.resume(co2) --1
+coroutine.resume(co2) --2
+coroutine.resume(co2) --3
+ 
+print(coroutine.status(co2))   -- suspended
+print(coroutine.running())
+ 
+print("----------")
+```
+
+输出
+
+```lua
+1
+dead
+----------
+1
+----------
+1
+2
+3
+running
+thread: 0x7fb801c05868    false
+suspended
+thread: 0x7fb801c04c88    true
+----------
+```
+
+coroutine.running就可以看出来,coroutine在底层实现就是一个线程。
+
+当create一个coroutine的时候就是在新线程中注册了一个事件。
+
+当使用resume触发事件的时候，create的coroutine函数就被执行了，当遇到yield的时候就代表挂起当前线程，等候再次resume触发事件。
+
+接下来我们分析一个更详细的实例：
+
+```lua
+function foo (a)
+    print("foo 函数输出", a)
+    return coroutine.yield(2 * a) -- 返回  2*a 的值
+end
+ 
+co = coroutine.create(function (a , b)
+    print("第一次协同程序执行输出", a, b) -- co-body 1 10
+    local r = foo(a + 1)
+     
+    print("第二次协同程序执行输出", r)
+    local r, s = coroutine.yield(a + b, a - b)  -- a，b的值为第一次调用协同程序时传入
+     
+    print("第三次协同程序执行输出", r, s)
+    return b, "结束协同程序"                   -- b的值为第二次调用协同程序时传入
+end)
+       
+print("main", coroutine.resume(co, 1, 10)) -- true, 4
+print("--分割线----")
+print("main", coroutine.resume(co, "r")) -- true 11 -9
+print("---分割线---")
+print("main", coroutine.resume(co, "x", "y")) -- true 10 end
+print("---分割线---")
+print("main", coroutine.resume(co, "x", "y")) -- cannot resume dead coroutine
+print("---分割线---")
+```
+
+输出
+
+```lua
+第一次协同程序执行输出    1    10
+foo 函数输出    2
+main    true    4
+--分割线----
+第二次协同程序执行输出    r
+main    true    11    -9
+---分割线---
+第三次协同程序执行输出    x    y
+main    true    10    结束协同程序
+---分割线---
+main    false    cannot resume dead coroutine
+---分割线---
+```
+
+以上实例接下如下：
+
+- 调用resume，将协同程序唤醒,resume操作成功返回true，否则返回false；
+- 协同程序运行；
+- 运行到yield语句；
+- yield挂起协同程序，第一次resume返回；（注意：此处yield返回，参数是resume的参数）
+- 第二次resume，再次唤醒协同程序；（注意：此处resume的参数中，除了第一个参数，剩下的参数将作为yield的参数）
+- yield返回；
+- 协同程序继续运行；
+- 如果使用的协同程序继续运行完成后继续调用 resume方法则输出：cannot resume dead coroutine
+
+resume和yield的配合强大之处在于，resume处于主程中，它将外部状态（数据）传入到协同程序内部；而yield则将内部的状态（数据）返回到主程中。
+
+
+
+### 生产者消费者问题
+
+现在使用Lua的协同程序来完成生产者-消费者这一经典问题。
+
+```lua
+local newProductor
+
+function productor()
+     local i = 0
+     while true do
+          i = i + 1
+          send(i)     -- 将生产的物品发送给消费者
+     end
+end
+
+function consumer()
+     while true do
+          local i = receive()     -- 从生产者那里得到物品
+          print(i)
+     end
+end
+
+function receive()
+     local status, value = coroutine.resume(newProductor)
+     return value
+end
+
+function send(x)
+     coroutine.yield(x)     -- x表示需要发送的值，值返回以后，就挂起该协同程序
+end
+
+-- 启动程序
+newProductor = coroutine.create(productor)
+consumer()
+```
+
+输出：
+
+```lua
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+……
+```
+
+
+
+## 15、文件IO
+
+Lua I/O 库用于读取和处理文件。分为简单模式（和C一样）、完全模式。
+
+- 简单模式（simple model）拥有一个当前输入文件和一个当前输出文件，并且提供针对这些文件相关的操作。
+- 完全模式（complete model） 使用外部的文件句柄来实现。它以一种面对对象的形式，将所有的文件操作定义为文件句柄的方法
+
+简单模式在做一些简单的文件操作时较为合适。但是在进行一些高级的文件操作的时候，简单模式就显得力不从心。例如同时读取多个文件这样的操作，使用完全模式则较为合适。
+
+打开文件操作语句如下：
+
+```lua
+file = io.open (filename [, mode])
+```
+
+mode的值有
+
+| 模式 | 描述                                                         |
+| ---- | ------------------------------------------------------------ |
+| r    | 只读模式打开，文件必须存在                                   |
+| w    | 打开只写文件，若文件存在则长度清0，该文件内容会消失。若文件不存在则创建文件 |
+| a    | 以附加的方式打开只写文件。若文件不存在，则会建立该文件，如果文件存在，写入的数据会被加到文件尾，即文件原先的内容会被保留。（EOF符保留） |
+| r+   | 以可读可写方式打开文件，该文件必须存在。                     |
+| w+   | 打开可读写文件，若文件存在则文件长度清为零，即该文件内容会消失。若文件不存在则建立该文件。 |
+| a+   | 与a类似，但此文件可读可写                                    |
+| b    | 二进制模式，如果文件是二进制文件，可以加上b                  |
+| +    | 表示对文件既可以读也可以写                                   |
+
+
+
+### 15.1、简单模式
+
+简单模式使用标准的 I/O 或使用一个当前输入文件和一个当前输出文件。
+
+```lua
+-- 以只读方式打开文件
+file = io.open("test.lua", "r")
+
+-- 设置默认输入文件为 test.lua
+io.input(file)
+
+-- 输出文件第一行
+print(io.read())
+
+-- 关闭打开的文件
+io.close(file)
+
+-- 以附加的方式打开只写文件
+file = io.open("test.lua", "a")
+
+-- 设置默认输出文件为 test.lua
+io.output(file)
+
+-- 在文件最后一行添加 Lua 注释
+io.write("--  test.lua 文件末尾注释")
+
+-- 关闭打开的文件
+io.close(file)
+```
+
+在以上实例中我们使用了 io."x" 方法，其中 io.read() 中我们没有带参数，参数可以是下表中的一个：
+
+| 模式         | 描述                                                         |
+| ------------ | ------------------------------------------------------------ |
+| "*n"         | 读取一个数字并返回它。例：`file.read("*n")`                  |
+| "*a"         | 从当前位置读取整个文件。例：`file.read("*a")`                |
+| "*l"（默认） | 读取下一行，在文件尾 (EOF) 处返回 nil。例：`file.read("*l")` |
+| number       | 返回一个指定字符个数的字符串，或在 EOF 时返回 nil。例：`file.read(5)` |
+
+其他的 io 方法有：
+
+- **io.tmpfile():**返回一个临时文件句柄，该文件以更新模式打开，程序结束时自动删除
+- **io.type(file):** 检测obj是否一个可用的文件句柄
+- **io.flush():** 向文件写入缓冲中的所有数据
+- **io.lines(optional file name):** 返回一个迭代函数，每次调用将获得文件中的一行内容，当到文件尾时，将返回 nil，但不关闭文件。
+
+
+
+### 15.2、完全模式
+
+通常我们需要在同一时间处理多个文件。我们需要使用 file:function_name 来代替 io.function_name 方法。以下实例演示了如何同时处理同一个文件:
+
+```lua
+-- 以只读方式打开文件
+file = io.open("test.lua", "r")
+
+-- 输出文件第一行
+print(file:read())
+
+-- 关闭打开的文件
+file:close()
+
+-- 以附加的方式打开只写文件
+file = io.open("test.lua", "a")
+
+-- 在文件最后一行添加 Lua 注释
+file:write("--test")
+
+-- 关闭打开的文件
+file:close()
+```
+
+read 的参数与简单模式一致。
+
+其他方法:
+
+- **file:seek(optional whence, optional offset):** 设置和获取当前文件位置,成功则返回最终的文件位置(按字节),失败则返回nil加错误信息。参数 whence 值可以是:
+
+  - "set": 从文件头开始
+  - "cur": 从当前位置开始[默认]
+  - "end": 从文件尾开始
+  - offset:默认为0
+
+  不带参数file:seek()则返回当前位置,file:seek("set")则定位到文件头,file:seek("end")则定位到文件尾并返回文件大小
+
+- **file:flush():** 向文件写入缓冲中的所有数据
+
+- **io.lines(optional file name):** 打开指定的文件 filename 为读模式并返回一个迭代函数，每次调用将获得文件中的一行内容，当到文件尾时，将返回 nil，并自动关闭文件。
+  若不带参数时io.lines() <=> io.input():lines(); 读取默认输入设备的内容，但结束时不关闭文件，如：
+
+  ```lua
+  for line in io.lines("main.lua") do
+  
+  　　print(line)
+  
+  　　end
+  ```
+
+  以下实例使用了 seek 方法，定位到文件倒数第 25 个位置并使用 read 方法的 *a 参数，即从当前位置(倒数第 25 个位置)读取整个文件。
+
+  ```lua
+  -- 以只读方式打开文件
+  file = io.open("test.lua", "r")
+  
+  file:seek("end",-25)
+  print(file:read("*a"))
+  
+  -- 关闭打开的文件
+  file:close()
+  ```
+
+  
+
+## 16、错误处理
+
+
+
+
+
+## 17、Debug
+
+
+
+## 18、垃圾回收
+
+
+
+## 19、面向对象
+
+
+
+## 20、数据库访问
