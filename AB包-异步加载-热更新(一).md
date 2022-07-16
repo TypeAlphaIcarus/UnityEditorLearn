@@ -920,5 +920,493 @@ Resources.UnloadUnusedAssets();
 
 
 
-## 2、变量与数据类型
+## 2、数据类型
+
+### 2.1、注释
+
+```lua
+--注释--
+--[[
+	多行注释
+  ]]
+--[[
+	多行注释
+--]]
+```
+
+
+
+### 2.2、数据类型
+
+Lua中有8种基本的数据类型
+
+```lua
+nil			--表示无效值
+boolean		--布尔类型
+number		--双精度浮点实数
+string		--字符串，可以用单引号或双引号表示
+function	--由C或Lua编写的函数
+userdata	--表示任意存储在C中的数据结构
+thread		--表示执行的独立线路，用于执行协同程序
+table		--表，实际为一个关联数组，数组的索引可以是数字、字符串或表类型
+    		--在Lua中，table的创建是通过构造表达式来完成的，最简单的是 {} ，表示一个空表
+```
+
+
+
+在使用`type()`进行类型比较时应当加上" "，因为其返回值是一个string类型
+
+```lua
+x = 1
+print(type(x) == number)	--这里number其实是为nil的变量
+print(type(x) == "number")	--输出true
+```
+
+
+
+#### 布尔值
+
+在Lua中，false和nil为false，其它均为true，0和1都为true
+
+
+
+#### number
+
+Lua默认只有一种number类型，即double类型，一下数据均为number类型
+
+```lua
+print(type(2))
+print(type(2.2))
+print(type(0.2))
+print(type(2e+1))
+print(type(0.2e-1))
+print(type(7.8263692594256e-06))
+```
+
+
+
+#### string
+
+字符串使用" "或' '来表示
+
+```lua
+string1 = "this is string1"
+string2 = 'this is string2'
+```
+
+
+
+也可以使用[[ ]]来表示多行字符串
+
+```lua
+html = [[
+<html>
+<head></head>
+<body>
+    <a href="http://www.runoob.com/">菜鸟教程</a>
+</body>
+</html>
+]]
+print(html)
+```
+
+
+
+在对字符串进行算数运算时，Lua会尝试将该字符串转为数字
+
+```lua
+print("2" + 6)
+--输出8
+print("2" + "6")
+--输出8
+```
+
+
+
+Lua中字符串通过 ..来连接，类似C#中的+
+
+```lua
+print("Hello" .. "World")
+--输出HelloWorld
+```
+
+
+
+#用于计算字符串的长度
+
+```lua
+s = "123456"
+print(#s)
+--输出6
+```
+
+
+
+#### table表
+
+Lua中，表是通过构造表达式来完成的，最简单的是 { }，创建了一个空表
+
+```lua
+local table1 = {}						--创建了一个空表
+local table2 = {"apple","orange","pear"}  --初始化创建表
+```
+
+Lua中的表为关联数组，数组索引可以是数组或字符串
+
+```lua
+a = {}
+key = 10
+a["key"] = "value"
+a[key] = 22
+a[key] = a[key] + 11
+for k, v in pairs(a) do
+    print(k .. ":" .. v)
+end
+--输出10 ：33 和 key:value
+--即a[10] = 33 a["kye"] = "value"
+```
+
+注意：
+
+Lua的表从索引1开始
+
+table长度和大小不固定，有新数据时table的长度会自动边长，没有初始化的table值为nil
+
+
+
+#### function函数
+
+在Lua中，函数被看作是"第一类值"，可以存放在变量里
+
+```lua
+function factorial(n)
+    if n == 0 then
+        return 1
+    else
+        return n * factorial(n - 1)
+    end
+end
+print(factorial(5))
+factorial2 = factorial
+print(factorial2(5))
+--两个都输出120
+```
+
+function可以以匿名函数的方式传递参数
+
+```lua
+function test(table, fun)
+    for k, v in pairs(tab) do
+        print(fun(k,v))
+    end
+end
+
+tab = {key1 = "val1", key2 = "val2"}
+test(tab, 
+    function(key,val)	--匿名函数
+        return key.."="..val
+    end
+)
+--输出
+--key1 = val1
+--key2 = val2
+```
+
+
+
+#### thread线程
+
+Lua中，最主要的线程是协同程序(coroutine)，与线程类似，拥有独立的栈、局部变量和指令指针，可以和其它协程共享局部变量和其它大部分东西
+
+线程和协程的区别：线程可以同时多个运行，协程任意时刻只能运行一个，并且只有处于运行状态的协程被挂起时(suspend)才会暂停
+
+
+
+#### userdata（自定义类型）
+
+userdata为用户自定义的类型，用于表示由应用程序或C/C++语言库所创建的类型，可以将任意C/C++类型存储到Lua变量中调用
+
+
+
+## 3、变量
+
+Lua 变量有三种类型：全局变量、局部变量、表中的域。变量的默认值均为 nil。
+
+Lua 中的变量都是全局变量，哪怕是语句块或是函数里，除非用 local 显式声明为局部变量。
+
+
+
+### 3.1、赋值语句
+
+Lua可以同时对多个变量进行赋值，赋值语句右侧的值会依次匹配左侧的变量
+
+```lua
+a, b = 10, "Hello"
+--a为10，b为"Hello"
+```
+
+
+
+遇到赋值语句Lua会先计算右边所有的值然后再执行赋值操作，所以可以进行交换变量的值
+
+```lua
+x, y = y, x
+a[i], a[j] = a[j], a[i]
+```
+
+还可以将函数返回值返回给变量
+
+```lua
+a, b = f()
+```
+
+
+
+注意：应尽量使用局部变量，可以避免命名冲突，而且局部变量访问更快
+
+
+
+### 3.2、索引
+
+table的索引除了[ ]之外还有.方式
+
+```lua
+t[i]
+t.i	--当索引为字符串类型时可使用
+```
+
+
+
+## 4、循环
+
+### 4.1、while循环
+
+```lua
+while(condition)
+do
+   statements
+end
+
+--例子
+a = 10
+while( a < 20 )
+do
+   print("a 的值为:", a)
+   a = a + 1
+end
+```
+
+
+
+### 4.2、for循环
+
+#### 数值for循环
+
+```lua
+for var=exp1,exp2,exp3 do	--var 从 exp1 变化到 exp2，每次变化以 exp3 为步长递增 var，并执行一次 "执行体"。exp3 是可选的，如果不指定，默认为1。
+    <执行体>  
+end  
+
+--例子：
+for i = 1,f(x) do
+    print(i)
+end
+ 
+for i = 10, 1, -1 do
+    print(i)
+end
+```
+
+
+
+#### 泛型for循环
+
+泛型 for 循环通过一个迭代器函数来遍历所有值，类似 foreach 语句。
+
+```lua
+--打印数组a的所有值  
+a = {"one", "two", "three"}
+for i, v in ipairs(a) do
+    print(i, v)
+end 
+--i是数组索引值，v是对应索引的数组元素值。ipairs是Lua提供的一个迭代器函数，用来迭代数组。
+```
+
+
+
+### 4.3、repeat...until循环
+
+```lua
+repeat
+   statements
+until( condition )
+
+--例子
+a = 10
+repeat	--[ 执行循环 --]
+   print("a的值为:", a)
+   a = a + 1
+until( a > 15 )
+```
+
+
+
+### 4.4、循环控制语句
+
+#### break
+
+用于退出当前循环或语句，并开始脚本执行紧接着的语句
+
+如果使用循环嵌套，break语句将停止最内层循环的执行，并开始执行的外层的循环语句。
+
+
+
+#### goto语句
+
+ goto 语句允许将控制流程无条件地转到被标记的语句处。
+
+```lua
+local a = 1
+::label:: print("--- goto label ---")
+
+a = a+1
+if a < 3 then
+    goto label   -- a 小于 3 的时候跳转到标签 label
+end
+```
+
+
+
+## 5、流程控制
+
+### 5.1、if
+
+```lua
+if(布尔表达式)
+then
+   --[ 在布尔表达式为 true 时执行的语句 --]
+end
+```
+
+
+
+### 5.2、if...else
+
+```lua
+if(布尔表达式)
+then
+   --[ 布尔表达式为 true 时执行该语句块 --]
+else
+   --[ 布尔表达式为 false 时执行该语句块 --]
+end
+```
+
+```lua
+if( 布尔表达式 1)
+then
+   --[ 在布尔表达式 1 为 true 时执行该语句块 --]
+
+elseif( 布尔表达式 2)
+then
+   --[ 在布尔表达式 2 为 true 时执行该语句块 --]
+
+elseif( 布尔表达式 3)
+then
+   --[ 在布尔表达式 3 为 true 时执行该语句块 --]
+else 
+   --[ 如果以上布尔表达式都不为 true 则执行该语句块 --]
+end
+```
+
+
+
+## 6、函数
+
+### 6.1、格式
+
+```lua
+--定义格式如下
+optional_function_scope function function_name( argument1, argument2, argument3..., argumentn)
+    function_body
+    return result_params_comma_separated
+end
+```
+
+- **optional_function_scope:** 该参数是可选的制定函数是**全局函数**还是**局部函数**，未设置该参数**默认为全局函数**，如果你需要设置函数为局部函数需要使用关键字 **local**。
+- **function_name:** 指定函数名称。
+- **argument1, argument2, argument3..., argumentn:** 函数参数，多个参数以逗号隔开，函数也可以不带参数。
+- **function_body:** 函数体，函数中需要执行的代码语句块。
+- **result_params_comma_separated:** 函数返回值，Lua语言函数可以返回多个值，每个值以逗号隔开。
+
+例子：
+
+```lua
+--[[ 函数返回两个值的最大值 --]]
+function max(num1, num2)
+
+   if (num1 > num2) then
+      result = num1;
+   else
+      result = num2;
+   end
+
+   return result;
+end
+-- 调用函数
+print("两值比较最大值为 ",max(10,4))
+print("两值比较最大值为 ",max(5,6))
+```
+
+
+
+### 6.2、函数参数
+
+Lua 中可以将函数作为参数传递给函数，如下实例：
+
+```lua
+myprint = function(param)
+   print("这是打印函数 -   ##",param,"##")
+end
+
+function add(num1, num2, functionPrint)
+   result = num1 + num2
+   functionPrint(result)	-- 调用传递的函数参数
+end
+
+myprint(10)		--直接调用函数
+add(2,5,myprint)-- myprint 函数作为参数传递
+--输出
+--这是打印函数 -   ##    10    ##
+--这是打印函数 -   ##    7    ##
+```
+
+
+
+### 6.3、多返回值
+
+Lua函数可以返回多个结果值，比如string.find，其返回匹配串"开始和结束的下标"（如果不存在匹配串返回nil）。
+
+```lua
+s, e = string.find("www.runoob.com", "runoob") 
+print(s, e)
+--输出
+--5    10	匹配的字符串下标为 5 - 10
+```
+
+
+
+### 6.4、可变参数
+
+Lua 函数可以接受可变数目的参数，和 C 语言类似，在函数参数列表中使用三点 **...** 表示函数有可变的参数。
+
+```lua
+function add(...)  
+local s = 0  
+  for i, v in ipairs{...} do   --> {...} 表示一个由所有变长参数构成的数组  
+    s = s + v  
+  end  
+  return s  
+end  
+print(add(3,4,5,6,7))  --->25
+```
 
